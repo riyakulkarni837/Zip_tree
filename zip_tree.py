@@ -355,19 +355,6 @@ class ZipTree:
             depth += 1
         return depth
 
-    def get_nodes_with_rank(self, level: int):
-        nodes = []
-
-        def collect_nodes(node, current_rank):
-            if node is not None:
-                if current_rank == level:
-                    nodes.append(node)
-                collect_nodes(node.left, current_rank)
-                collect_nodes(node.right, current_rank)
-
-        collect_nodes(self.root, 0)
-        return nodes
-
 # feel free to define new classes/methods in addition to the above
 # fill in the definitions of each required member function (above),
 # and any additional member functions you define
