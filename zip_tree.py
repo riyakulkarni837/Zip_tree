@@ -170,15 +170,14 @@ class ZipTree:
         return height
 
     def get_depth(self, key: KeyType) -> int:
-        return self._get_depth(self.root, key, 0)
-
-    def _get_depth(self, node: Node, key: KeyType, depth: int) -> int:
-        if node is None:
-            raise KeyError(f"Key {key} not found in the tree.")
-
-        if key == node.key:
-            return depth
-        elif key < node.key:
-            return self._get_depth(node.left, key, depth + 1)
-        else:
-            return self._get_depth(node.right, key, depth + 1)
+        node = self.root
+        depth = 0
+        while node:
+            if key == node.key:
+                return depth
+            elif key < node.key:
+                node = node.left
+            else:
+                node = node.right
+            depth += 1
+        raise KeyError(f"Key {key} not found in the tree.")
