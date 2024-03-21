@@ -188,10 +188,6 @@ KeyType = TypeVar('KeyType')
 ValType = TypeVar('ValType')
 
 class Node:
-    key = None
-    value = None
-    rank = 0
-
     def __init__(self, key: KeyType, value: ValType, rank: int):
         self.key = key
         self.value = value
@@ -202,14 +198,16 @@ class Node:
 class ZipTree:
     def __init__(self):
         self.root = None
-        self.numNodes = 0
+        self.num_nodes = 0
 
     @staticmethod
     def get_random_rank() -> int:
-        mean_rank = 1
-        std_dev = 0.5
-        rank = int(random.normalvariate(mean_rank, std_dev))
-        return max(1, rank)
+        rank = 0
+        while True:
+            rank += 1
+            val = random.randint(1, 2)
+            if val == 1:
+                return rank - 1
 
     def unzip(self, x: Node, y: Node):
         def unzip_lookup(key: KeyType, node: Node):
@@ -225,50 +223,50 @@ class ZipTree:
                 return p, node
         return unzip_lookup(x.key, y)
 
-    def getInsertNode(self, node: Node) -> Node:
-        cur = self.root
-        par = None
-        while cur is not None:
-            if cur.rank < node.rank:
-                return par, cur
-            elif cur.rank == node.rank and cur.key > node.key:
-                return par, cur
+    def get_insert_node(self, node: Node) -> Node:
+        current = self.root
+        parent = None
+        while current is not None:
+            if current.rank < node.rank:
+                return parent, current
+            elif current.rank == node.rank and current.key > node.key:
+                return parent, current
             else:
-                par = cur
-                if cur.key > node.key:
-                    cur = cur.left
+                parent = current
+                if current.key > node.key:
+                    current = current.left
                 else:
-                    cur = cur.right
-        return par, None
+                    current = current.right
+        return parent, None
 
-    def insert(self, key: KeyType, val: ValType, rank: int = -1):
-        self.numNodes += 1
+    def insert(self, key: KeyType, value: ValType, rank: int = -1):
+        self.num_nodes += 1
         if rank == -1:
             rank = ZipTree.get_random_rank()
-        node = Node(key, val, rank)
+        node = Node(key, value, rank)
 
         if self.root is None:
             self.root = node
         else:
-            par, ins = self.getInsertNode(node)
-            if ins is None:
-                if par.key > key:
-                    par.left = node
+            parent, insert_node = self.get_insert_node(node)
+            if insert_node is None:
+                if parent.key > key:
+                    parent.left = node
                 else:
-                    par.right = node
+                    parent.right = node
                 return
-            if par is None:
-                p, q = self.unzip(node, ins)
+            if parent is None:
+                p, q = self.unzip(node, insert_node)
                 node.left = p
                 node.right = q
                 self.root = node
                 return
-            if par is not None:
-                if par.key < node.key:
-                    par.right = node
+            if parent is not None:
+                if parent.key < node.key:
+                    parent.right = node
                 else:
-                    par.left = node
-            p, q = self.unzip(node, ins)
+                    parent.left = node
+            p, q = self.unzip(node, insert_node)
             node.left = p
             node.right = q
 
@@ -277,83 +275,99 @@ class ZipTree:
         if x is None:
             return None
 
-        def zipup(p: Node, q: Node):
+        def zip_up(p: Node, q: Node):
             if p is None:
                 return q
             if q is None:
                 return p
             if q.rank > p.rank:
-                q.left = zipup(p, q.left)
+                q.left = zip_up(p, q.left)
                 return q
             else:
-                p.right = zipup(p.right, q)
+                p.right = zip_up(p.right, q)
                 return p
-        return zipup(x.left, x.right)
+        return zip_up(x.left, x.right)
 
     def remove(self, key: KeyType):
         """Remove a node from the Zip Tree."""
-        self.numNodes -= 1
-        cur = self.root
-        par = None
-        while cur is not None:
-            if cur.key == key:
+        self.num_nodes -= 1
+        current = self.root
+        parent = None
+        while current is not None:
+            if current.key == key:
                 break
-            elif cur.key < key:
-                par = cur
-                cur = cur.right
+            elif current.key < key:
+                parent = current
+                current = current.right
             else:
-                par = cur
-                cur = cur.left
+                parent = current
+                current = current.left
 
-        # Check if cur is None before proceeding
-        if cur is None:
+        # Check if current is None before proceeding
+        if current is None:
             return
 
-        node = self.zip(cur)
-        if par is None:
+        node = self.zip(current)
+        if parent is None:
             self.root = node
             return
-        if par.key > cur.key:
-            par.left = node
+        if parent.key > current.key:
+            parent.left = node
         else:
-            par.right = node
+            parent.right = node
 
     def find(self, key: KeyType) -> ValType:
         node = self.root
-        while node is not None:
-            if key == node.key:
-                return node.value
-            elif key < node.key:
+        while node.key != key:
+            if node.key > key:
                 node = node.left
             else:
                 node = node.right
-        raise KeyError(f"Key {key} not found in the tree.")
+        return node.value
 
     def get_size(self) -> int:
-        return self.numNodes
+        return self.num_nodes
 
     def get_height(self) -> int:
-        q = [self.root]
-        ht = 0
-        while q:
-            ht += 1
-            for _ in range(len(q)):
-                node = q.pop(0)
-                if node.left is not None:
-                    q.append(node.left)
-                if node.right is not None:
-                    q.append(node.right)
-        return ht - 1
+        if not self.root:
+            return -1
+        height = 0
+        current_level = [self.root]
+        while current_level:
+            height += 1
+            next_level = []
+            for node in current_level:
+                if node.left:
+                    next_level.append(node.left)
+                if node.right:
+                    next_level.append(node.right)
+            current_level = next_level
+        return height - 1
 
-    def get_depth(self, key: KeyType):
+    def get_depth(self, key: KeyType) -> int:
         node = self.root
         depth = 0
-        while node is not None:
-            if key == node.key:
-                return depth
-            elif key < node.key:
+        while node.key != key:
+            if node.key > key:
                 node = node.left
             else:
                 node = node.right
             depth += 1
-        raise KeyError(f"Key {key} not found in the tree.")
+        return depth
+
+    def get_nodes_with_rank(self, level: int):
+        nodes = []
+
+        def collect_nodes(node, current_rank):
+            if node is not None:
+                if current_rank == level:
+                    nodes.append(node)
+                collect_nodes(node.left, current_rank)
+                collect_nodes(node.right, current_rank)
+
+        collect_nodes(self.root, 0)
+        return nodes
+
+# feel free to define new classes/methods in addition to the above
+# fill in the definitions of each required member function (above),
+# and any additional member functions you define
