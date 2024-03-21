@@ -133,19 +133,16 @@ class ZipTree:
         else:
             parent.right = node
 
-    def _find(self, node: Node, key: KeyType) -> Optional[ValType]:
-        if node is None:
-            return None
-
-        if key == node.key:
-            return node.value
-        elif key < node.key:
-            return self._find(node.left, key)
-        else:
-            return self._find(node.right, key)
-
     def find(self, key: KeyType) -> Optional[ValType]:
-        return self._find(self.root, key)
+        node = self.root
+        while node:
+            if key == node.key:
+                return node.value
+            elif key < node.key:
+                node = node.left
+            else:
+                node = node.right
+        return None
 
     def get_size(self) -> int:
         return self.num_nodes
