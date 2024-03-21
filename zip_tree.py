@@ -202,10 +202,12 @@ class ZipTree:
 
     @staticmethod
     def get_random_rank() -> int:
-        mean_rank = 1
-        std_dev = 0.5
-        rank = int(random.normalvariate(mean_rank, std_dev))
-        return max(1, rank)
+        rank = 0
+        while True:
+            rank += 1
+            val = random.randint(1, 2)
+            if val == 1:
+                return rank - 1
 
     def unzip(self, x: Node, y: Node):
         def unzip_lookup(key: KeyType, node: Node):
