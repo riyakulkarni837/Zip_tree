@@ -1,3 +1,9 @@
+# explanations for member functions are provided in requirements.py
+# each file that uses a Zip Tree should import it from this file.
+
+# explanations for member functions are provided in requirements.py
+# each file that uses a Zip Tree should import it from this file.
+
 from typing import TypeVar
 from collections import deque
 import random
@@ -7,6 +13,7 @@ ValType = TypeVar('ValType')
 
 class Node:
     def __init__(self, key: KeyType, value: ValType, rank: int):
+        """Initialize a Node."""
         self.key = key
         self.value = value
         self.rank = rank
@@ -15,11 +22,13 @@ class Node:
 
 class ZipTree:
     def __init__(self):
+        """Initialize a ZipTree."""
         self.root = None
         self.num_nodes = 0
 
     @staticmethod
     def get_random_rank() -> int:
+        """Generate a random rank."""
         rank = 0
         while True:
             rank += 1
@@ -28,6 +37,7 @@ class ZipTree:
                 return rank - 1
 
     def unzip(self, x: Node, y: Node):
+        """Unzip nodes x and y."""
         def unzip_lookup(key: KeyType, node: Node):
             if node is None:
                 return None, None
@@ -42,6 +52,7 @@ class ZipTree:
         return unzip_lookup(x.key, y)
 
     def get_insert_node(self, node: Node) -> Node:
+        """Get the insertion node."""
         current = self.root
         parent = None
         while current is not None:
@@ -58,6 +69,7 @@ class ZipTree:
         return parent, None
 
     def insert(self, key: KeyType, value: ValType, rank: int = -1):
+        """Insert a node into the ZipTree."""
         self.num_nodes += 1
         if rank == -1:
             rank = ZipTree.get_random_rank()
@@ -107,7 +119,7 @@ class ZipTree:
         return zip_up(x.left, x.right)
 
     def remove(self, key: KeyType):
-        """Remove a node from the Zip Tree."""
+        """Remove a node from the ZipTree."""
         self.num_nodes -= 1
         current = self.root
         parent = None
@@ -135,6 +147,7 @@ class ZipTree:
             parent.right = node
 
     def find(self, key: KeyType) -> ValType:
+        """Find a node with the given key."""
         node = self.root
         while node is not None:
             if node.key == key:
@@ -146,9 +159,11 @@ class ZipTree:
         raise KeyError("Key not found")
 
     def get_size(self) -> int:
+        """Get the number of nodes in the ZipTree."""
         return self.num_nodes
 
     def get_height(self) -> int:
+        """Get the height of the ZipTree."""
         if not self.root:
             return -1
         height = 0
@@ -159,6 +174,7 @@ class ZipTree:
         return height - 1
 
     def get_depth(self, key: KeyType) -> int:
+        """Get the depth of a node with the given key."""
         node = self.root
         depth = 0
         while node is not None:
