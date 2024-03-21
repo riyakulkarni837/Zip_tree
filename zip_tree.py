@@ -149,21 +149,19 @@ class ZipTree:
     def get_size(self) -> int:
         return self.num_nodes
 
-    def get_height(self) -> int:                    
+    def get_height(self) -> int:
         if not self.root:
             return -1
-        height = 0
-        current_level = [self.root]
-        while current_level:
-            height += 1
-            next_level = []
-            for node in current_level:
-                if node.left:
-                    next_level.append(node.left)
-                if node.right:
-                    next_level.append(node.right)
-            current_level = next_level
-        return height - 1
+
+        def calculate_height(node: Node) -> int:
+            if node is None:
+                return -1
+            else:
+                left_height = calculate_height(node.left)
+                right_height = calculate_height(node.right)
+                return max(left_height, right_height) + 1
+
+        return calculate_height(self.root)
 
     def get_depth(self, key: KeyType) -> int:
         return self._get_depth(self.root, key, 0)
