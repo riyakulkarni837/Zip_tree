@@ -1,5 +1,6 @@
-from typing import TypeVar
+from typing import TypeVar, Optional
 import random
+from collections import deque
 
 KeyType = TypeVar('KeyType')
 ValType = TypeVar('ValType')
@@ -24,8 +25,8 @@ class ZipTree:
         rank = int(random.normalvariate(mean_rank, std_dev))
         return max(1, rank)  
 
-    def unzip(self, x:Node, y:Node):
-        def unzip_lookup(key:KeyType, node:Node):
+    def unzip(self, x: Node, y: Node):
+        def unzip_lookup(key: KeyType, node: Node):
             if node is None:
                 return None, None
             if node.key < key:
@@ -132,9 +133,9 @@ class ZipTree:
         else:
             parent.right = node
 
-    def _find(self, node: Node, key: KeyType) -> ValType:
+    def _find(self, node: Node, key: KeyType) -> Optional[ValType]:
         if node is None:
-            raise KeyError(f"Key {key} not found in the tree.")
+            return None
 
         if key == node.key:
             return node.value
@@ -143,7 +144,7 @@ class ZipTree:
         else:
             return self._find(node.right, key)
 
-    def find(self, key: KeyType) -> ValType:
+    def find(self, key: KeyType) -> Optional[ValType]:
         return self._find(self.root, key)
 
     def get_size(self) -> int:
@@ -152,16 +153,21 @@ class ZipTree:
     def get_height(self) -> int:
         if not self.root:
             return -1
-
-        def calculate_height(node: Node) -> int:
-            if node is None:
-                return -1
-            else:
-                left_height = calculate_height(node.left)
-                right_height = calculate_height(node.right)
-                return max(left_height, right_height) + 1
-
-        return calculate_height(self.root)
+        
+        height = -1
+        current_level = deque([self.root])
+        while current_level:
+            height += 1
+            next_level = deque()
+            while current_level:
+                node = current_level.popleft()
+                if node.left:
+                    next_level.append(node.left)
+                if node.right:
+                    next_level.append(node.right)
+            current_level = next_level
+        
+        return height
 
     def get_depth(self, key: KeyType) -> int:
         return self._get_depth(self.root, key, 0)
